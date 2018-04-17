@@ -1,8 +1,9 @@
-package com.example.lee.footprints;
+package com.example.lee.footprints.adapter;
 
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.view.View;
 
 import java.util.List;
 
@@ -27,4 +28,6 @@ public class Adapter extends FragmentPagerAdapter {
     public int getCount() {
         return listFragments.size();
     }
+
+
 }

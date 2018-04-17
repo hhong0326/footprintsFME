@@ -1,20 +1,17 @@
-package com.example.lee.footprints;
+package com.example.lee.footprints.activity;
 
-import android.Manifest;
-import android.app.Activity;
-import android.content.pm.PackageManager;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
-import android.util.Log;
-import android.widget.TextView;
+
+import com.example.lee.footprints.fragment.MapFragment;
+import com.example.lee.footprints.R;
+import com.example.lee.footprints.fragment.SettingFragment;
+import com.example.lee.footprints.fragment.TimelineFragment;
+import com.example.lee.footprints.adapter.Adapter;
+import com.example.lee.footprints.fragment.ARFragment;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,15 +24,17 @@ public class MainActivity extends AppCompatActivity {
 
     TabLayout tabLayout;
     ViewPager viewPager;
-    private int RESULT_PERMISSIONS = 100;
+   // private int RESULT_PERMISSIONS = 100;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_main);
-        requestPermissionCamera();
+
         initViewPager();
     }
+/*
     public boolean requestPermissionCamera(){
         int sdkVersion = Build.VERSION.SDK_INT;
         if(sdkVersion >= Build.VERSION_CODES.M) {
@@ -51,7 +50,7 @@ public class MainActivity extends AppCompatActivity {
 
         return true;
     }
-
+*/
 
     private void initViewPager() {
         viewPager = (ViewPager)findViewById(R.id.view_pager);
@@ -60,14 +59,17 @@ public class MainActivity extends AppCompatActivity {
         listFragments.add(new TimelineFragment());
         listFragments.add(new MapFragment());
         listFragments.add(new ARFragment());
+        listFragments.add(new SettingFragment());
         Adapter fragmentPagerAdapter = new Adapter(getSupportFragmentManager(),listFragments);
         viewPager.setAdapter(fragmentPagerAdapter);
         tabLayout = (TabLayout)findViewById(R.id.tabs);
         tabLayout.addTab(tabLayout.newTab().setText("타임라인"));
         tabLayout.addTab(tabLayout.newTab().setText("지도"));
         tabLayout.addTab(tabLayout.newTab().setText("카메라"));
+        tabLayout.addTab(tabLayout.newTab().setText("설정"));
 
         viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
+        viewPager.setCurrentItem(2);
         tabLayout.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
@@ -79,6 +81,10 @@ public class MainActivity extends AppCompatActivity {
                         viewPager.setCurrentItem(tab.getPosition());
                         break;
                     case 2:
+                        viewPager.setCurrentItem(tab.getPosition());
+
+                        break;
+                    case 3:
                         viewPager.setCurrentItem(tab.getPosition());
                         break;
                 }
