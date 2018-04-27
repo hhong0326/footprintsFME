@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "264864469828",
+    "firebase_url": "https://footprints-199208.firebaseio.com",
+    "project_id": "footprints-199208",
+    "storage_bucket": "footprints-199208.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:264864469828:android:ce35405ff380f03e",
+        "android_client_info": {
+          "package_name": "com.example.lee.footprints"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "264864469828-kg3cv2f7lsk3pjrpobouog4ahovs6ehp.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAXoKpgOVVrCi1rRDBDbDA5_FfYgwLCHJ4"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

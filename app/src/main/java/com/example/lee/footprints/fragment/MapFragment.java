@@ -31,6 +31,7 @@ import com.example.lee.footprints.Picture;
 import com.example.lee.footprints.R;
 import com.example.lee.footprints.activity.AddActivity;
 import com.example.lee.footprints.activity.FindActivity;
+import com.example.lee.footprints.activity.ImageActivity;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
@@ -42,8 +43,10 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.location.places.Places;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.maps.android.clustering.Cluster;
 import com.google.maps.android.clustering.ClusterManager;
+import com.google.maps.android.clustering.algo.NonHierarchicalDistanceBasedAlgorithm;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpVersion;
@@ -57,7 +60,9 @@ import org.json.JSONObject;
 
 import java.io.InputStream;
 import java.net.URL;
+import java.util.Collection;
 import java.util.Iterator;
+import java.util.Vector;
 
 import static android.content.Context.LOCATION_SERVICE;
 
@@ -90,7 +95,12 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,GoogleAp
     private double currentLat;
     private double currentLng;
     private Bitmap[] image = null;
+    private int picNum = -1; //이미지뷰 순서
 
+    private com.example.lee.footprints.Location currentLocation = null;
+    private MyClusterRenderer myClusterRenderer;
+    public static Vector<Picture> picCollection = new Vector<Picture>();
+    private int tag = -1;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -118,8 +128,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,GoogleAp
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         layout = inflater.inflate(R.layout.activity_map, null);
-        locationManager = (LocationManager)getActivity().getSystemService(LOCATION_SERVICE);
-        requestMyLocation();
+
+        currentLocation = currentLocation.getInstance();
+        currentLat = currentLocation.getLocation().latitude;
+        currentLng = currentLocation.getLocation().longitude;
 
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inSampleSize = 8;
@@ -157,14 +169,22 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,GoogleAp
             }
         });
 
+        // Inflate the layout for this fragment
+        return layout;
+    }
+
+    public void refreshItems() {
+        Log.e("REFRESH","refresh");
+        requestJson=null;
+        requestImage=null;
+        if(mClusterManager!=null)
+            mClusterManager.clearItems();
         requestJson = new RequestJson(getActivity());
         requestImage = new RequestImage(getActivity());
         //백그라운드 작업 실행
         requestJson.execute();
-
-        // Inflate the layout for this fragment
-        return layout;
     }
+    /*
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         //ACCESS_COARSE_LOCATION 권한
@@ -187,8 +207,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,GoogleAp
             return;
         }
         //요청
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,1000,10,locationListener);
-        //locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,1000,10,locationListener);
+        //locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,1000,10,locationListener);
+        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,1000,10,locationListener);
     }
     //위치정보 구하기 리스너
     LocationListener locationListener = new LocationListener() {
@@ -218,7 +238,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,GoogleAp
         @Override
         public void onProviderDisabled(String provider) { }
     };
-
+*/
     public static MapFragment newInstance() {
 
         Bundle args = new Bundle();
@@ -252,6 +272,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,GoogleAp
     @Override
     public void onResume() {
         super.onResume();
+        refreshItems();
+        Log.e("RESUME","REFRESH");
         mapView.onResume();
         if ( googleApiClient != null)
             googleApiClient.connect();
@@ -301,7 +323,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,GoogleAp
             mapView.onCreate(savedInstanceState);
         }
     }
-
+    CameraPosition[] mPreviousCameraPosition = {null};
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
@@ -311,29 +333,27 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,GoogleAp
         // 매끄럽게 이동함
         mMap.animateCamera(CameraUpdateFactory.zoomTo(15));
 
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(currentLat,currentLng),16));
         // 클러스터 매니저 생성
-        mClusterManager = new ClusterManager<>(getActivity(),mMap);
+        mClusterManager = new ClusterManager<Picture>(getActivity(),mMap);
 
-        final CameraPosition[] mPreviousCameraPosition = {null};
-        mMap.setOnCameraIdleListener(new GoogleMap.OnCameraIdleListener() {
-            @Override
-            public void onCameraIdle() {
-                CameraPosition position = mMap.getCameraPosition();
-                mPreviousCameraPosition[0] = mMap.getCameraPosition();
-                mClusterManager.cluster();
-            }
-
-        });
-
+        mMap.setOnCameraIdleListener(mClusterManager);
         mMap.setOnMarkerClickListener(mClusterManager);
-        mClusterManager.setRenderer(new MyClusterRenderer(getActivity(), mMap, mClusterManager));
+        myClusterRenderer = new MyClusterRenderer(getActivity(), mMap, mClusterManager);
+        myClusterRenderer.setMinClusterSize(1);
+        mClusterManager.setRenderer(myClusterRenderer);
+
         //한 개의 마커 누를 때!!
         mClusterManager.setOnClusterItemClickListener(new ClusterManager.OnClusterItemClickListener<Picture>() {
             @Override
             public boolean onClusterItemClick(Picture picture) {
                 cleanImageView();
+                picNum++;
+                tag++;
+                picCollection.add(picture);
                 setImageView = new SetImageView(picture.getImage());
                 setImageView.execute();
+
                 return false;
             }
         });
@@ -345,15 +365,16 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,GoogleAp
                 cleanImageView();
                 Iterator<Picture> itr = cluster.getItems().iterator();
                 while(itr.hasNext()) {
+                    picNum++;
+                    tag++;
                     Picture pic = itr.next();
+                    picCollection.add(pic);
                     setImageView = new SetImageView(pic.getImage());
                     setImageView.execute();
                 }
-
                 return false;
             }
         });
-
         if ( googleApiClient == null) {
             buildGoogleApiClient();
         }
@@ -361,6 +382,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,GoogleAp
         {
             mMap.setMyLocationEnabled(true);
         }
+
     }
 
     // 임의의 좌표 투입
@@ -385,6 +407,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,GoogleAp
     public void cleanImageView() {
         linear.removeAllViews();
         setImageView = null;
+        picCollection.clear();
+        picNum = -1;
+        tag = -1;
     }
 
     private void buildGoogleApiClient() {
@@ -601,9 +626,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,GoogleAp
         protected Void doInBackground(Void... params) {
 
             try {
-                if (image != null)
+                /*if (image != null)
                     for (int i = 0; i < image.length; i++)
-                        image[i].recycle();
+                        image[i].recycle();*/
                 image = null;
                 image = new Bitmap[num];
                 for (int i = 0; i < num; i++) {
@@ -628,14 +653,63 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,GoogleAp
                 addItem(latArray[i], lngArray[i], image[i]);
             }
             Log.e("addItem", "gogogogogo");
+            mClusterManager.cluster();
         }
     }
     public class SetImageView extends AsyncTask<Void, Integer, Void> {
 
         Bitmap mImage;
+        ImageView imageView;
 
         public SetImageView(Bitmap image) {
             mImage = image;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            imageView = new ImageView(getActivity());
+            imageView.setTag(tag);Log.e("tags",Integer.toString(tag));
+        }
+
+        @Override
+        protected Void doInBackground(Void... params) {
+
+            return null;
+        }
+
+        @Override
+        protected void onProgressUpdate(Integer... progress) {
+            super.onProgressUpdate(progress);
+        }
+
+        @Override
+        protected void onPostExecute(Void result) {
+
+            linear.addView(imageView);
+            imageView.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+            imageView.setAdjustViewBounds(true);
+
+            imageView.setImageBitmap(mImage);
+
+
+            Log.e("IMAGES", "IMAGEVIEWS ADDED");
+                imageView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Intent intent = new Intent(getActivity(), ImageActivity.class);
+                        intent.putExtra("PIC_NUM",(int)view.getTag());
+                        startActivity(intent);
+                    }
+                });
+
+        }
+    }
+    /*
+    public class SetLocation extends AsyncTask<Void, Integer, Void> {
+
+        public SetLocation() {
+
         }
 
         @Override
@@ -655,16 +729,11 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,GoogleAp
 
         @Override
         protected void onPostExecute(Void result) {
-            ImageView imageView = new ImageView(getActivity());
-
-            linear.addView(imageView);
-            imageView.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
-            imageView.setAdjustViewBounds(true);
-
-            imageView.setImageBitmap(mImage);
-            Log.e("IMAGES", "IMAGEVIEWS ADDED");
+            locationManager = (LocationManager)getActivity().getSystemService(LOCATION_SERVICE);
+            requestMyLocation();
         }
     }
+    */
 /* 현재좌표와 마커와의 거리를 여기서 계산해야 하나??
     public double getDistance(Double lat1, Double lng1, Double lat2, Double lng2) {
         double distance = 0;

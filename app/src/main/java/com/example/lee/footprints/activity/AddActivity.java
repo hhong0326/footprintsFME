@@ -1,30 +1,68 @@
 package com.example.lee.footprints.activity;
 
+import android.app.Activity;
+import android.app.ProgressDialog;
+import android.content.Context;
+import android.content.Intent;
+import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 
 import com.example.lee.footprints.R;
+import com.example.lee.footprints.fragment.MapFragment;
+
 import android.widget.EditText;
+
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpVersion;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.mime.HttpMultipartMode;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.params.CoreProtocolPNames;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.charset.Charset;
+
 public class AddActivity extends AppCompatActivity {
 
+    final int REQUEST_IMAGE=100;
     ImageView imageView;
     EditText editText;
     Button button;
+    private Uri fileUri;
+    private String filePath;
+    private UploadFile uploadFile;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add);
 
+        uploadFile = new UploadFile(this);
+
         imageView = (ImageView)findViewById(R.id.imageView);
 
         imageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // 앨범 여는 코드 + 사진 가져오는 코드 + imageView에 비트맵 출력하는 코드
+
+                Intent intent = new Intent(Intent.ACTION_PICK);
+                intent.setType(MediaStore.Images.Media.CONTENT_TYPE);
+                intent.setData(MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                startActivityForResult(intent, REQUEST_IMAGE);
             }
         });
 
@@ -35,9 +73,156 @@ public class AddActivity extends AppCompatActivity {
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // 서버에 업로드 하는 코드
+                uploadFile.execute(filePath);
             }
         });
     }
+    @Override
+    protected  void onActivityResult(int requestCode, int resultCode, Intent data) {
+
+        if(requestCode == REQUEST_IMAGE) {
+            if(resultCode == Activity.RESULT_OK) {
+                try {
+                    fileUri = data.getData();
+                    filePath = getPath(fileUri);
+                    Bitmap image = MediaStore.Images.Media.getBitmap(getContentResolver(), data.getData());
+                    imageView.setImageBitmap(image);
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+    public String getPath(Uri uri){
+        if (uri == null){
+            return null;
+        }
+
+        String[] projection = {MediaStore.Images.Media.DATA};
+        Cursor cursor = managedQuery(uri, projection, null, null, null);
+        if (cursor != null){
+            int column_idx = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+            cursor.moveToFirst();
+            return cursor.getString(column_idx);
+        }
+
+        return uri.getPath();
+    }
+    public class UploadFile extends AsyncTask<String, Integer, Void> {
+
+        public static final int DOWNLOAD_PROGRESS = 0;
+
+        private final String url_Address = "http://footprints.gonetis.com:8080/moo/upload";
+
+        private ProgressDialog dialog;
+        Context mContext;
+
+        public UploadFile(Context context){
+            mContext = context;
+        }
+
+        @Override
+        protected void onPreExecute(){
+            super.onPreExecute();
+            dialog = new ProgressDialog(mContext);
+            dialog.setMessage("업로드중입니다.");
+            dialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+            dialog.setProgress(0);
+            dialog.show();
+        }
+
+        @Override
+        protected Void doInBackground(String... psth){
+            HttpClient httpClient = null;
+
+            try{
+                httpClient = new DefaultHttpClient();
+                httpClient.getParams().setParameter(CoreProtocolPNames.PROTOCOL_VERSION, HttpVersion.HTTP_1_1);
+
+                HttpPost httpPost = new HttpPost(url_Address);
+                httpPost.setHeader("Content-type", "multipart/form-data;boundary=-------------");
+
+                MultipartEntityBuilder builder = MultipartEntityBuilder.create();
+                builder.setBoundary("-------------");
+                builder.setCharset(Charset.forName("UTF-8"));
+                builder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
+
+                builder.addTextBody("name", "");
+                builder.addTextBody("message", "");
+
+                File file = new File(psth[0]);
+                builder.addBinaryBody("file", file, ContentType.DEFAULT_BINARY, file.getName());
+
+                HttpEntity entity = builder.build();
+                httpPost.setEntity(entity);
+                HttpResponse response = httpClient.execute(httpPost);
+            }catch (IOException e){
+                e.printStackTrace();
+            }finally {
+                if(httpClient != null){
+                    httpClient.getConnectionManager().shutdown();
+                }
+            }
+
+            return null;
+        }
+
+        @Override
+        protected void onProgressUpdate(Integer... progress){
+            super.onProgressUpdate(progress);
+            dialog.setProgress((int)progress[0]);
+        }
+
+        @Override
+        protected void onPostExecute(Void result){
+            try{
+                dialog.dismiss();
+            }catch (Exception e){
+
+            }
+        }
+    }
+
+
+/*
+
+    public void uploadFile(){
+
+        HttpClient httpClient = null;
+
+        try{
+            httpClient = new DefaultHttpClient();
+            httpClient.getParams().setParameter(CoreProtocolPNames.PROTOCOL_VERSION, HttpVersion.HTTP_1_1);
+
+            HttpPost httpPost = new HttpPost(url_Address);
+            httpPost.setHeader("Content-Disposition", "form-data");
+
+            MultipartEntityBuilder builder = MultipartEntityBuilder.create();
+            builder.setCharset(Charset.forName("UTF-8"));
+            builder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
+
+            builder.addTextBody("name", "");
+            builder.addTextBody("message", "");
+
+            File file = new File(filePath);
+            builder.addBinaryBody("file", file);
+
+            HttpEntity entity = builder.build();
+            httpPost.setEntity(entity);
+            httpClient.execute(httpPost);
+        }catch (IOException e){
+            e.printStackTrace();
+        }finally {
+            if(httpClient != null){
+                httpClient.getConnectionManager().shutdown();
+            }
+        }
+
+    }
+*/
 
 }

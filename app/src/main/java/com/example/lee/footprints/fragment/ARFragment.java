@@ -21,7 +21,9 @@ import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.example.lee.footprints.R;
+import com.example.lee.footprints.activity.MainActivity;
 import com.google.android.gms.maps.MapView;
+import com.google.android.gms.maps.model.LatLng;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -57,11 +59,13 @@ public class ARFragment extends Fragment implements TextureView.SurfaceTextureLi
     List<Camera.Size> supportedPreviewSizes;
     Camera.Size previewSize;
 
-    double latitude, longitude, altitude;
+    LatLng location = null;
     long time;
     Geocoder geoCoder;
     LocationManager manager;
     View layout;
+
+    com.example.lee.footprints.Location currentLocation = null;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -74,7 +78,7 @@ public class ARFragment extends Fragment implements TextureView.SurfaceTextureLi
 
         getActivity().getWindow().setFlags(android.view.WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 android.view.WindowManager.LayoutParams.FLAG_FULLSCREEN);
-
+        currentLocation = currentLocation.getInstance();
         if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED ||
                 ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.CAMERA,
@@ -95,7 +99,7 @@ public class ARFragment extends Fragment implements TextureView.SurfaceTextureLi
         // Inflate the layout for this fragment
         return layout;
     }
-
+/*
     private  void checkPermission(){
         Log.i("ASD" , "체크 퍼미션~~~");
         int permissionCheck1 = ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.INTERNET);
@@ -219,7 +223,7 @@ public class ARFragment extends Fragment implements TextureView.SurfaceTextureLi
     }
 
 
-
+*/
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
@@ -256,17 +260,15 @@ public class ARFragment extends Fragment implements TextureView.SurfaceTextureLi
         parameters.setRotation(result);
 
         Log.i("ASD", "스타트로케이션 스타트!");
-        startLocationService();
 
-        Log.i("ASD", "저장할 위치들: " + latitude+ " " + longitude);
-        parameters.setGpsLatitude(latitude);
-        parameters.setGpsLongitude(longitude);
+        location = currentLocation.getLocation();
+
+        Log.i("ASD", "저장할 위치들: " + location.latitude+ " " + location.longitude);
+        parameters.setGpsLatitude(location.latitude);
+        parameters.setGpsLongitude(location.longitude);
         parameters.setGpsTimestamp(time);
-        parameters.setGpsAltitude(altitude);
 
         camera.setDisplayOrientation(result);
-
-
 
         camera.setParameters(parameters);
         try{
@@ -307,7 +309,7 @@ public class ARFragment extends Fragment implements TextureView.SurfaceTextureLi
                     try{
                         File dir=new File(Environment.getExternalStorageDirectory().getAbsolutePath()+"/myApp");
                         Log.i("ASD", "파일0 생성");
-                        Log.i("ASD", "위치: " + latitude +" "+ longitude);
+                        Log.i("ASD", "위치: " + location.latitude +" "+ location.longitude);
                         if(!dir.exists()){
                             Log.i("ASD", "폴더 생성");
                             dir.mkdir();

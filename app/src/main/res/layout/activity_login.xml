@@ -1,57 +1,72 @@
-<?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<merge
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.example.lee.footprints.activity.MainActivity"
-    tools:layout_editor_absoluteY="25dp">
+    tools:context="com.example.lee.footprints.activity.LoginActivity">
 
     <ImageView
-        android:id="@+id/imageView"
-        android:layout_width="0dp"
-        android:layout_height="586dp"
-        android:layout_marginEnd="1dp"
-        android:layout_marginStart="1dp"
-        android:src="@drawable/logo"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        android:id="@+id/bg_image_view"
+        android:layout_width="1280dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        android:scaleType="center"
+        app:srcCompat="@drawable/logo" />
 
-    <EditText
-        android:id="@+id/idBox"
+
+    <com.google.android.gms.common.SignInButton
+        android:id="@+id/sign_in_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="33dp"
-        android:layout_marginEnd="1dp"
-        android:background="@drawable/line"
-        android:ems="10"
-        android:hint="ID"
-        android:inputType="textPersonName"
-        app:layout_constraintBottom_toTopOf="@+id/pwBox"
-        app:layout_constraintEnd_toEndOf="@+id/pwBox" />
+        android:layout_gravity="center"
+        android:translationY="200dp" />
 
-    <EditText
-        android:id="@+id/pwBox"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="227dp"
-        android:layout_marginStart="1dp"
-        android:background="@drawable/line"
-        android:ems="10"
-        android:hint="PASSWORD"
-        android:inputType="textPassword"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="@+id/loginButton" />
+    <!--<ImageView-->
+    <!--android:id="@+id/imageView"-->
+    <!--android:layout_width="0dp"-->
+    <!--android:layout_height="586dp"-->
+    <!--android:layout_marginEnd="1dp"-->
+    <!--android:layout_marginStart="1dp"-->
+    <!--android:src="@drawable/logo"-->
+    <!--app:layout_constraintBottom_toBottomOf="parent"-->
+    <!--app:layout_constraintEnd_toEndOf="parent"-->
+    <!--app:layout_constraintStart_toStartOf="parent" />-->
 
-    <Button
-        android:id="@+id/loginButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="85dp"
-        android:layout_marginTop="38dp"
-        android:text="LOGIN"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/pwBox" />
+    <!--<EditText-->
+    <!--android:id="@+id/idBox"-->
+    <!--android:layout_width="wrap_content"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--android:layout_marginBottom="33dp"-->
+    <!--android:layout_marginEnd="1dp"-->
+    <!--android:background="@drawable/line"-->
+    <!--android:ems="10"-->
+    <!--android:hint="ID"-->
+    <!--android:inputType="textPersonName"-->
+    <!--app:layout_constraintBottom_toTopOf="@+id/pwBox"-->
+    <!--app:layout_constraintEnd_toEndOf="@+id/pwBox" />-->
 
-</android.support.constraint.ConstraintLayout>
+    <!--<EditText-->
+    <!--android:id="@+id/pwBox"-->
+    <!--android:layout_width="wrap_content"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--android:layout_marginBottom="227dp"-->
+    <!--android:layout_marginStart="1dp"-->
+    <!--android:background="@drawable/line"-->
+    <!--android:ems="10"-->
+    <!--android:hint="PASSWORD"-->
+    <!--android:inputType="textPassword"-->
+    <!--app:layout_constraintBottom_toBottomOf="parent"-->
+    <!--app:layout_constraintStart_toStartOf="@+id/loginButton" />-->
+
+    <!--<Button-->
+    <!--android:id="@+id/loginButton"-->
+    <!--android:layout_width="wrap_content"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--android:layout_marginStart="85dp"-->
+    <!--android:layout_marginTop="38dp"-->
+    <!--android:text="LOGIN"-->
+    <!--app:layout_constraintStart_toStartOf="parent"-->
+    <!--app:layout_constraintTop_toBottomOf="@+id/pwBox" />-->
+
+</merge>

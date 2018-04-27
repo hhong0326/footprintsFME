@@ -29,6 +29,8 @@
         <activity android:name=".activity.MainActivity" />
         <activity android:name=".activity.FindActivity" />
         <activity android:name=".activity.AddActivity" />
+        <activity android:name=".activity.UserProfileActivity" />
+        <activity android:name=".activity.ImageActivity" />
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyAxpXc1BuYXySMuxJxQrwbywywEbgONs50" />
