@@ -4,7 +4,10 @@ public class Tag {
     private String id;
     private int num;
 
-    public Tag(){}
+    public Tag(String name, int count){
+        id = name;
+        num = count;
+    }
 
     public Tag(String id){
         this.id = id;

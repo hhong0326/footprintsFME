@@ -7,6 +7,8 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.BitmapFactory;
 import android.hardware.Camera;
+import android.media.MediaScannerConnection;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v4.app.ActivityCompat;
@@ -329,10 +331,12 @@ public class ARFragment extends Fragment implements TextureView.SurfaceTextureLi
                         Log.i("ASD", "오류~~~");
                         e.printStackTrace();
                     }
+
                     camera.startPreview();
                 }
             });
         }
     }
+
 
 }

@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.Matrix;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -17,6 +18,7 @@ import android.widget.ImageView;
 
 import com.example.lee.footprints.R;
 import com.example.lee.footprints.fragment.MapFragment;
+import com.google.firebase.auth.FirebaseAuth;
 
 import android.widget.EditText;
 
@@ -78,7 +80,7 @@ public class AddActivity extends AppCompatActivity {
         });
     }
     @Override
-    protected  void onActivityResult(int requestCode, int resultCode, Intent data) {
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 
         if(requestCode == REQUEST_IMAGE) {
             if(resultCode == Activity.RESULT_OK) {
@@ -86,7 +88,7 @@ public class AddActivity extends AppCompatActivity {
                     fileUri = data.getData();
                     filePath = getPath(fileUri);
                     Bitmap image = MediaStore.Images.Media.getBitmap(getContentResolver(), data.getData());
-                    imageView.setImageBitmap(image);
+                    imageView.setImageBitmap(rotateImage(image, 90));
                 } catch (FileNotFoundException e) {
                     e.printStackTrace();
                 } catch (IOException e) {
@@ -96,6 +98,16 @@ public class AddActivity extends AppCompatActivity {
                 }
             }
         }
+    }
+    // 이미지 회전 함수
+    public Bitmap rotateImage(Bitmap src, float degree) {
+
+        // Matrix 객체 생성
+        Matrix matrix = new Matrix();
+        // 회전 각도 셋팅
+        matrix.postRotate(degree);
+        // 이미지와 Matrix 를 셋팅해서 Bitmap 객체 생성
+        return Bitmap.createBitmap(src, 0, 0, src.getWidth(),src.getHeight(), matrix, true);
     }
     public String getPath(Uri uri){
         if (uri == null){
@@ -151,8 +163,9 @@ public class AddActivity extends AppCompatActivity {
                 builder.setCharset(Charset.forName("UTF-8"));
                 builder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
 
-                builder.addTextBody("name", "");
-                builder.addTextBody("message", "");
+                builder.addTextBody("name", FirebaseAuth.getInstance().getCurrentUser().getEmail());
+                //builder.addTextBody("user_account", "aaa@bbb.ccc");
+                builder.addTextBody("message", editText.getText().toString());
 
                 File file = new File(psth[0]);
                 builder.addBinaryBody("file", file, ContentType.DEFAULT_BINARY, file.getName());
@@ -181,6 +194,8 @@ public class AddActivity extends AppCompatActivity {
         protected void onPostExecute(Void result){
             try{
                 dialog.dismiss();
+                imageView.setImageResource(0);
+                editText.setText("");
             }catch (Exception e){
 
             }

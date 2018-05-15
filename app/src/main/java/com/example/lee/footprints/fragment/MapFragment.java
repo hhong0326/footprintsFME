@@ -7,16 +7,13 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.location.Location;
 import android.location.LocationManager;
-import android.location.LocationListener;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
-import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -24,13 +21,13 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.Toast;
 
 import com.example.lee.footprints.MyClusterRenderer;
 import com.example.lee.footprints.Picture;
 import com.example.lee.footprints.R;
 import com.example.lee.footprints.activity.AddActivity;
 import com.example.lee.footprints.activity.FindActivity;
+import com.example.lee.footprints.activity.FindPicActivity;
 import com.example.lee.footprints.activity.ImageActivity;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -43,10 +40,8 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.location.places.Places;
-import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.maps.android.clustering.Cluster;
 import com.google.maps.android.clustering.ClusterManager;
-import com.google.maps.android.clustering.algo.NonHierarchicalDistanceBasedAlgorithm;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpVersion;
@@ -60,11 +55,8 @@ import org.json.JSONObject;
 
 import java.io.InputStream;
 import java.net.URL;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.Vector;
-
-import static android.content.Context.LOCATION_SERVICE;
 
 
 /**
@@ -86,16 +78,19 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,GoogleAp
     private RequestImage requestImage;
     private SetImageView setImageView;
 
+    private String[] useraccountArray;
+    private String[] usernameArray;
+    private String[] thumbArray;
     private String[] fileUrlArray;
     private Double[] latArray;
     private Double[] lngArray;
+    private String[] tagArray;
 
     private int num; //총 받은 사진개수
 
     private double currentLat;
     private double currentLng;
     private Bitmap[] image = null;
-    private int picNum = -1; //이미지뷰 순서
 
     private com.example.lee.footprints.Location currentLocation = null;
     private MyClusterRenderer myClusterRenderer;
@@ -348,7 +343,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,GoogleAp
             @Override
             public boolean onClusterItemClick(Picture picture) {
                 cleanImageView();
-                picNum++;
+
                 tag++;
                 picCollection.add(picture);
                 setImageView = new SetImageView(picture.getImage());
@@ -365,7 +360,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,GoogleAp
                 cleanImageView();
                 Iterator<Picture> itr = cluster.getItems().iterator();
                 while(itr.hasNext()) {
-                    picNum++;
+
                     tag++;
                     Picture pic = itr.next();
                     picCollection.add(pic);
@@ -386,10 +381,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,GoogleAp
     }
 
     // 임의의 좌표 투입
-    private void addItem(Double lat, Double lng, Bitmap image) {
+    private void addItem(Double lat, Double lng, Bitmap image, String fileURL, String useraccount, String username, String tags) {
         String latString = String.format("%.6f", lat);
         String lngString = String.format("%.6f", lng);
-        mClusterManager.addItem(new Picture(Double.parseDouble(latString), Double.parseDouble(lngString), image));
+        mClusterManager.addItem(new Picture(Double.parseDouble(latString), Double.parseDouble(lngString), image, fileURL, useraccount, username, tags));
     }
 /*
     public void setImageView(Bitmap image) {
@@ -408,7 +403,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,GoogleAp
         linear.removeAllViews();
         setImageView = null;
         picCollection.clear();
-        picNum = -1;
+
         tag = -1;
     }
 
@@ -562,26 +557,40 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,GoogleAp
                 JSONArray jsonArray = new JSONArray(body);
                 StringBuffer sb = new StringBuffer();
 
+                useraccountArray = new String[jsonArray.length()];
+                usernameArray = new String[jsonArray.length()];
+                thumbArray = new String[jsonArray.length()];
                 fileUrlArray = new String[jsonArray.length()];
                 latArray = new Double[jsonArray.length()];
                 lngArray = new Double[jsonArray.length()];
+                tagArray = new String[jsonArray.length()];
+
+
 
                 num = jsonArray.length();
 
                 //데이터 뽑는 부분
                 for(int i=0; i<jsonArray.length(); i++){
                     JSONObject jsonObject = jsonArray.getJSONObject(i);
-                    String fileName = jsonObject.getString("thumbPicName");
+                    String userAccount = jsonObject.getString("user_account");
+                    String userName = jsonObject.getString("username");
+                    String thumbName = jsonObject.getString("thumbPicName");
+                    String fileName = jsonObject.getString("fileName");
                     Double latitude = jsonObject.getDouble("latitude");
                     Double longitude = jsonObject.getDouble("longitude");
+                    String tags = jsonObject.getString("tags");
 
+                    useraccountArray[i] = userAccount;
+                    usernameArray[i] = userName;
+                    thumbArray[i] = thumbName;
                     fileUrlArray[i] = fileName;
                     latArray[i] = latitude;
                     lngArray[i] = longitude;
+                    tagArray[i] = tags;
 
                     //테스트용으로 출력할 문장 저장
                     sb.append(
-                            "파일명 : " + fileName + "\n위도 : " + latitude + "\n경도 : " + longitude + "\n\n"
+                            "파일명 : " + thumbName + "\n위도 : " + latitude + "\n경도 : " + longitude + "\n\n"
                     );
                     //textView.setText(sb.toString());
                 }
@@ -610,7 +619,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,GoogleAp
     public class RequestImage extends AsyncTask <Void, Integer, Void> {
 
         Context mContext;
-        String url_Address = "http://footprints.gonetis.com:8080/moo/resources/";
+        //String url_Address = "http://footprints.gonetis.com:8080/moo/resources/";
         String thumb_url_Address = "http://footprints.gonetis.com:8080/moo/resources/thumbnails/";
 
         public RequestImage(Context context) {
@@ -631,8 +640,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,GoogleAp
                         image[i].recycle();*/
                 image = null;
                 image = new Bitmap[num];
+
                 for (int i = 0; i < num; i++) {
-                    image[i] = BitmapFactory.decodeStream((InputStream) new URL(thumb_url_Address + fileUrlArray[i]).getContent());
+                    image[i] = BitmapFactory.decodeStream((InputStream) new URL(thumb_url_Address + thumbArray[i]).getContent());
+                    Log.e("THUMB",thumb_url_Address + thumbArray[i]);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -650,13 +661,14 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,GoogleAp
         protected void onPostExecute(Void result) {
             for (int i = 0; i < num; i++) {
                 //if(getDistance(latArray[i],lngArray[i],currentLat,currentLng)<=1000) //meter 단위
-                addItem(latArray[i], lngArray[i], image[i]);
+                addItem(latArray[i], lngArray[i], image[i], fileUrlArray[i], useraccountArray[i], usernameArray[i], tagArray[i]);
             }
             Log.e("addItem", "gogogogogo");
             mClusterManager.cluster();
         }
     }
     public class SetImageView extends AsyncTask<Void, Integer, Void> {
+
 
         Bitmap mImage;
         ImageView imageView;
