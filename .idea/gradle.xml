@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="GradleSettings">
+    <option name="linkedExternalProjectsSettings">
+      <GradleProjectSettings>
+        <option name="distributionType" value="DEFAULT_WRAPPED" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/app" />
+            <option value="$PROJECT_DIR$/app-viro_core-release" />
+            <option value="$PROJECT_DIR$/core-1.1.0" />
+            <option value="$PROJECT_DIR$/httpclient-4.3.1" />
+            <option value="$PROJECT_DIR$/httpcore-4.3" />
+            <option value="$PROJECT_DIR$/httpmime-4.3.1" />
+            <option value="$PROJECT_DIR$/sdk-common-1.101.0" />
+          </set>
+        </option>
+        <option name="resolveModulePerSourceSet" value="false" />
+      </GradleProjectSettings>
+    </option>
+  </component>
+</project>

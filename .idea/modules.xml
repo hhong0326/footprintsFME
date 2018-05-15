@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/app-viro_core-release/app-viro_core-release.iml" filepath="$PROJECT_DIR$/app-viro_core-release/app-viro_core-release.iml" />
+      <module fileurl="file://$PROJECT_DIR$/core-1.1.0/core-1.1.0.iml" filepath="$PROJECT_DIR$/core-1.1.0/core-1.1.0.iml" />
+      <module fileurl="file://$PROJECT_DIR$/footprintsFMEFinal.iml" filepath="$PROJECT_DIR$/footprintsFMEFinal.iml" />
+      <module fileurl="file://$PROJECT_DIR$/httpclient-4.3.1/httpclient-4.3.1.iml" filepath="$PROJECT_DIR$/httpclient-4.3.1/httpclient-4.3.1.iml" />
+      <module fileurl="file://$PROJECT_DIR$/httpcore-4.3/httpcore-4.3.iml" filepath="$PROJECT_DIR$/httpcore-4.3/httpcore-4.3.iml" />
+      <module fileurl="file://$PROJECT_DIR$/httpmime-4.3.1/httpmime-4.3.1.iml" filepath="$PROJECT_DIR$/httpmime-4.3.1/httpmime-4.3.1.iml" />
+      <module fileurl="file://$PROJECT_DIR$/sdk-common-1.101.0/sdk-common-1.101.0.iml" filepath="$PROJECT_DIR$/sdk-common-1.101.0/sdk-common-1.101.0.iml" />
+    </modules>
+  </component>
+</project>

@@ -1,1 +1,1 @@
-include ':app', ':httpclient-4.3.1', ':httpcore-4.3', ':httpmime-4.3.1'
+include ':app', ':httpclient-4.3.1', ':httpcore-4.3', ':httpmime-4.3.1', ':app-viro_core-release', ':core-1.1.0', ':sdk-common-1.101.0'

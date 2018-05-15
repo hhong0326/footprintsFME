@@ -1,17 +1,45 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:id="@+id/main_layout">
 
-    <TextView
-        android:id="@+id/textView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Timeline"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-</android.support.constraint.ConstraintLayout>
+    <LinearLayout
+        android:id="@+id/bottom_frame_controls"
+        android:visibility="gone"
+        android:layout_alignParentBottom="true"
+        android:orientation="vertical"
+        android:gravity="bottom|center_horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TextView
+            android:textColor="#0000FF"
+            android:id="@+id/gps_value"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="현재위치"
+            android:textAppearance="?android:attr/textAppearanceLarge" />
+        <ToggleButton
+            android:id="@+id/toggle1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textOff="위치정보수신시작"
+            android:textOn="위치정보수신종료"/>
+        <Button
+            android:id="@+id/calc_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="calc location!"
+            android:layout_margin="10dp"
+            android:scaleType="fitCenter"/>
+        <Button
+            android:id="@+id/photo_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Hello photo!"
+            android:layout_margin="10dp"
+            android:scaleType="fitCenter"/>
+    </LinearLayout>
+</RelativeLayout>
