@@ -432,17 +432,17 @@ public class TimelineFragment extends Fragment {
 
             node[i].setGeometry(box[i]);
             node[i].setPosition(convLocationToVec(0, 0));
-            node[i].setClickListener(new ClickListener() {
-                @Override
-                public void onClick(int i, Node node, Vector vector) {
-
-                }
-
-                @Override
-                public void onClickState(int i, Node node, ClickState clickState, Vector vector) {
-                    onBoxClick(clickState, box[i]);
-                }
-            });
+//            node[i].setClickListener(new ClickListener() {
+//                @Override
+//                public void onClick(int i, Node node, Vector vector) {
+//
+//                }
+//
+//                @Override
+//                public void onClickState(int i, Node node, ClickState clickState, Vector vector) {
+//                    onBoxClick(clickState, box[i]);
+//                }
+//            });
 
             rootNode.addChildNode(node[i]);
         }
